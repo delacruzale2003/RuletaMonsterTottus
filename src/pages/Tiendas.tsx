@@ -52,7 +52,8 @@ export default function Tienda() {
     const [editingLoading, setEditingLoading] = useState(false);
     const [selectedStore, setSelectedStore] = useState<Store | null>(null);
     
-    const prizeOptions = ["Inka Chips", "Mandala", "Tote bag", "Bola playera", "Pin metalico"];
+        const prizeOptions = ["ULTRA ALFOMBRA DE YOGA", "ULTRA PARAGUAS", "ULTRA LENTES DE SOL", "ULTRA BOCINA", "ULTRA CARGADOR", "ULTRA TOMATODO YETI"];
+
 
     // --- FUNCIONES CORE ---
 
