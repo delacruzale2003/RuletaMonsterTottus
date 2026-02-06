@@ -1,14 +1,33 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { Settings, Menu } from 'lucide-react';
+import { Settings, Menu, Lock } from 'lucide-react';
+import BackgroundCC from "../components/BackgroundCC";
 
 const Home: React.FC = () => {
     const navigate = useNavigate();
     const { storeId: paramStoreId } = useParams<{ storeId: string }>();
     const [searchParams] = useSearchParams();
 
+    // --- ESTADOS PARA LOGIN ---
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
+    const [error, setError] = useState("");
+
     const activeStoreId = paramStoreId || searchParams.get("store");
 
+    // --- LÓGICA DE LOGIN ---
+    const handleLogin = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (username === "admin" && password === "admin123") {
+            setIsAuthenticated(true);
+            setError("");
+        } else {
+            setError("Credenciales incorrectas");
+        }
+    };
+
+    // --- NAVEGACIÓN ---
     const goToStores = () => {
         if (activeStoreId) {
             navigate(`/tiendas?store=${activeStoreId}`);
@@ -21,47 +40,111 @@ const Home: React.FC = () => {
         navigate('/registros'); 
     };
 
+    // --- ESTILOS ---
+    const neonColor = '#a2e71a';
+
+    const neonCircleStyle = {
+        backgroundColor: 'transparent',
+        border: `3px solid ${neonColor}`,
+        boxShadow: `0 0 15px ${neonColor}, inset 0 0 8px ${neonColor}`,
+    };
+
+    const inputStyle = "w-full px-4 py-2 bg-black/50 border border-white/30 rounded-full text-white placeholder-gray-400 focus:outline-none focus:border-[#a2e71a] focus:ring-1 focus:ring-[#a2e71a] transition-all text-center";
+
     return (
-        <div className="relative min-h-screen bg-black flex flex-col items-center justify-center p-4 overflow-hidden">
+        <div className="relative min-h-[100dvh] flex flex-col items-center justify-center p-4 overflow-hidden font-sans">
             
-            {/* 1. Logo centrado exactamente en el medio */}
-            <div className="flex-1 flex items-center justify-center">
+            <BackgroundCC />
+
+            {/* LOGO SIEMPRE VISIBLE (Un poco más pequeño en login para dar espacio) */}
+            <div className={`flex items-center justify-center w-full transition-all duration-500 ${isAuthenticated ? 'flex-1' : 'mb-8'}`}>
                 <img 
-                    src="/inkachipslogo.png" 
+                    src="/tottusmonster.png" 
                     alt="Logo Inka Chips" 
-                    className="w-55 h-auto drop-shadow-2xl" 
+                    className={`h-auto transition-all duration-500 ${isAuthenticated ? 'w-48 sm:w-64' : 'w-32 sm:w-40'}`} 
                 />
             </div>
 
-            {/* 2. Navbar Inferior con ajuste para safe-area (evita que lo tape la barra del navegador) */}
-            <div 
-                className="fixed bottom-0 left-0 w-full flex justify-center items-center gap-6 px-4 pb-12 z-50"
-                style={{ 
-                    paddingBottom: 'calc(env(safe-area-inset-bottom) + 40px)' // Detecta la barra del dispositivo + 40px de margen
-                }}
-            >
-                
-                {/* Botón de Registros (3 rayas) */}
-                <button
-                    onClick={goToRegistros}
-                    style={{ backgroundColor: '#65c7c3' }}
-                    className="flex items-center justify-center w-14 h-14 rounded-full text-white shadow-lg transform transition-all active:scale-90 hover:brightness-110"
-                    title="Registros"
-                >
-                    <Menu size={28} />
-                </button>
+            {/* --- CONTENIDO CONDICIONAL --- */}
+            {!isAuthenticated ? (
+                // === VISTA DE LOGIN ===
+                <div className="z-20 w-full max-w-xs animate-fade-in">
+                    <form 
+                        onSubmit={handleLogin}
+                        className="bg-black/40 backdrop-blur-md border border-white/20 p-8 rounded-3xl shadow-2xl flex flex-col gap-4"
+                        style={{
+                            boxShadow: `0 0 20px rgba(162, 231, 26, 0.1), inset 0 0 20px rgba(0,0,0,0.8)`
+                        }}
+                    >
+                        <div className="flex justify-center mb-2">
+                            <div className="p-3 rounded-full border border-[#a2e71a] bg-black/50">
+                                <Lock size={24} color={neonColor} />
+                            </div>
+                        </div>
 
-                {/* Botón de Configuración (Settings) */}
-                <button
-                    onClick={goToStores}
-                    style={{ backgroundColor: '#65c7c3' }}
-                    className="flex items-center justify-center w-14 h-14 rounded-full text-white shadow-lg transform transition-all active:scale-90 hover:brightness-110"
-                    title="Configuración"
-                >
-                    <Settings size={28} />
-                </button>
-            </div>
+                        <h2 className="text-white text-center text-xl font-bold tracking-widest mb-2">ACCESO</h2>
 
+                        <div className="space-y-3">
+                            <input 
+                                type="text" 
+                                placeholder="Usuario" 
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
+                                className={inputStyle}
+                            />
+                            <input 
+                                type="password" 
+                                placeholder="Contraseña" 
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                className={inputStyle}
+                            />
+                        </div>
+
+                        {error && (
+                            <p className="text-red-400 text-xs text-center font-bold animate-pulse">
+                                {error}
+                            </p>
+                        )}
+
+                        <button 
+                            type="submit"
+                            className="w-full py-2 rounded-full font-bold text-black mt-2 tracking-widest hover:brightness-110 active:scale-95 transition-transform shadow-[0_0_10px_#a2e71a]"
+                            style={{ backgroundColor: neonColor }}
+                        >
+                            ENTRAR
+                        </button>
+                    </form>
+                </div>
+            ) : (
+                // === VISTA DE MENÚ (Una vez logueado) ===
+                <div 
+                    className="fixed bottom-0 left-0 w-full flex justify-center items-center gap-10 px-4 z-50 animate-fade-in-up"
+                    style={{ 
+                        paddingBottom: 'calc(max(env(safe-area-inset-bottom), 20px) + 20px)' 
+                    }}
+                >
+                    {/* Botón de Registros */}
+                    <button
+                        onClick={goToRegistros}
+                        style={neonCircleStyle}
+                        className="flex items-center justify-center w-16 h-16 rounded-full transform transition-all active:scale-90 hover:scale-105 bg-black/20 backdrop-blur-sm"
+                        title="Registros"
+                    >
+                        <Menu size={32} className="text-white" />
+                    </button>
+
+                    {/* Botón de Configuración */}
+                    <button
+                        onClick={goToStores}
+                        style={neonCircleStyle}
+                        className="flex items-center justify-center w-16 h-16 rounded-full transform transition-all active:scale-90 hover:scale-105 bg-black/20 backdrop-blur-sm"
+                        title="Configuración"
+                    >
+                        <Settings size={32} className="text-white" />
+                    </button>
+                </div>
+            )}
         </div>
     );
 };

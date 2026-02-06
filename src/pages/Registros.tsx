@@ -42,7 +42,7 @@ export default function Registros() {
     const [modalFoto, setModalFoto] = useState<string | null>(null);
     const [cargando, setCargando] = useState(false);
 
-    const campaignName = import.meta.env.VITE_CAMPAIGN || 'CAMPAÑA_DEFAULT';
+    const campaignName = import.meta.env.VITE_CAMPAIGN ;
     const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
     const apiAdmin = `${API_BASE_URL}/api/v1/admin`;
 

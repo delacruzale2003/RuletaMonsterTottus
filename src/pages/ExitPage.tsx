@@ -1,114 +1,93 @@
 import React from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { Settings,  MapPin } from 'lucide-react'; 
+import { useLocation } from 'react-router-dom';
+import { MapPin } from 'lucide-react'; 
+// IMPORTANTE: Asegúrate de importar tu fondo animado
+import BackgroundCC from "../components/BackgroundCC";
 
 const ExitPage: React.FC = () => {
     const location = useLocation();
-    const navigate = useNavigate();
     
-    // Recuperamos prizeName y storeId del state
+    // Recuperamos datos del state
     const { prizeName, storeId, storeName } = location.state || {}; 
 
-    const BRAND_COLOR_BLACK = "#000000ff"; 
-    const BRAND_COLOR_TEAL = "#5bc4bf";
-
-    const handlePlayAgain = () => {
-        if (storeId) {
-            navigate(`/${storeId}`); 
-        } else {
-            navigate('/');
-        }
+    // Lógica para generar el nombre de la imagen:
+    // "Ultra Bocina" -> "ultra_bocina" -> "/ultra_bocina.png"
+    const getPrizeImage = (name: string) => {
+        if (!name) return null;
+        const formattedName = name.trim().toLowerCase().replace(/\s+/g, '_');
+        return `/${formattedName}.png`;
     };
 
-    const goToStores = () => {
-        if (storeId) {
-            navigate(`/tiendas?store=${storeId}`);
-        } else {
-            navigate('/tiendas');
-        }
-    };
+    const prizeImage = getPrizeImage(prizeName);
 
     return (
-        <div 
-            style={{ backgroundColor: BRAND_COLOR_BLACK }} 
-            className="min-h-screen flex flex-col items-center justify-center p-4 overscroll-y-none relative font-sans text-center"
-        >
-            <div className="absolute inset-0 bg-[url('/pattern.png')] opacity-10 pointer-events-none"></div>
+        <div className="min-h-screen flex flex-col items-center justify-center p-4 overscroll-y-none relative font-sans text-center overflow-hidden">
+            
+            {/* 1. FONDO ANIMADO */}
+            <div className="absolute inset-0 z-0">
+                <BackgroundCC />
+            </div>
 
-            {/* Ajuste de ancho máximo para que no se sienta tan "gordo" en pantallas grandes */}
-            <div className="z-10 w-[95%] max-w-xs sm:max-w-sm flex flex-col items-center">
+            <div className="z-10 w-[95%] max-w-xs sm:max-w-sm flex flex-col items-center animate-fade-in-up">
                 
+                {/* LOGO */}
                 <img
-                    src="/inkachipslogo.png"
-                    alt="Inka Chips Logo"
-                    className="w-32 sm:w-40 h-auto mb-6 drop-shadow-md" 
+                    src="/tottusmonster.png"
+                    alt="Logo Monster Tottus"
+                    className="w-48 sm:w-56 h-auto mb-6 drop-shadow-[0_5px_15px_rgba(0,0,0,0.5)]" 
                 />
                 
-                {/* Contenedor de Felicidades con padding responsive */}
-                <div 
-                    style={{ backgroundColor: BRAND_COLOR_TEAL }}  
-                    className="rounded-3xl p-5 sm:p-8 w-full border-4 border-white shadow-2xl mb-8"
-                >
-                    <h1 className="text-3xl sm:text-5xl text-white font-creativeLand tracking-tight mb-4 drop-shadow-sm">
-                        FELICIDADES
+                {/* TEXTO DE CABECERA */}
+                <div className="mb-8">
+                    <h1 className="text-5xl sm:text-6xl text-white font-creativeLand tracking-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                        FELICIDADES <br />GANASTE
                     </h1>
-
-                    <div className="bg-transparent font-creativeLand rounded-xl p-4 sm:p-6 mb-4 border-4 border-white">
-                        {prizeName ? (
-                            <h2 className="text-5xl sm:text-4xl text-white uppercase break-words leading-tight">
-                                Ganaste <br />
-                                {prizeName}
-                            </h2>
-                        ) : (
-                            <h2 className="text-lg text-white/70 font-bold">
-                                PREMIO NO DETECTADO
-                            </h2>
-                        )}
-                    </div>
-
-                    <div className="space-y-2 text-white font-medium text-xs sm:text-sm">
-                        <p className="drop-shadow-sm leading-tight">
-                            Acércate al módulo de atención para reclamar tu premio.
-                        </p>
-                        <p className="text-white/80 text-[10px] sm:text-xs italic">
-                            *Recuerda mostrar tu DNI y el comprobante de compra.
-                        </p>
-                    </div>
+                    
                 </div>
 
-                {/* === NAVBAR INFERIOR RESPONSIVE === */}
-                <div className="flex flex-col items-center gap-3 ">
-                    <div className="flex items-center justify-center gap-3 ">
-                        {/* BOTÓN VOLVER A JUGAR */}
-                        <button 
-                            onClick={handlePlayAgain} 
-                            style={{ backgroundColor: '#5dc4c0' }}
-                            className="flex items-center justify-center flex-1 py-3 px-4 rounded-full text-white font-black shadow-lg transform transition-all border-2 border-transparent hover:brightness-110 active:scale-95"
-                        >
-                            
-                            <span className="text-2xl sm:text-3xl tracking-tight px-4 font-creativeLand  whitespace-nowrap">Juega Aqui</span>
-                        </button>
-
-                        {/* BOTÓN SETTINGS */}
-                        <button 
-                            onClick={goToStores}
-                            style={{ backgroundColor: '#5dc4c0' }}
-                            className="flex items-center justify-center w-12 h-12 rounded-full text-white border-2 border-white/20 shadow-lg transform transition-transform active:scale-95 hover:brightness-110 flex-shrink-0"
-                        >
-                            <Settings size={24} />
-                        </button>
+                {/* IMAGEN DEL PREMIO */}
+                {prizeName && prizeImage ? (
+                    <div className="mb-8 relative">
+                        {/* Efecto de resplandor detrás del premio */}
+                        <div className="absolute inset-0 blur-[60px] opacity-20 rounded-full animate-pulse"></div>
+                        <img 
+                            src={prizeImage} 
+                            alt={prizeName}
+                            className="w-56 h-auto object-contain mx-auto relative z-10 drop-shadow-2xl hover:scale-110 transition-transform duration-500 ease-out"
+                        />
                     </div>
+                ) : (
+                    <div className="h-32 flex items-center justify-center text-white/50 italic mb-4">
+                        Imagen no disponible
+                    </div>
+                )}
 
-                    {/* Nombre de la tienda también en el ExitPage para consistencia */}
-                    {storeId && (
-                        <div className="flex items-center gap-1 text-white/60 mt-2">
-                            <MapPin size={12} className="text-[#5dc4c0]" />
-                            <span className="text-[10px] sm:text-xs font-medium tracking-wide uppercase">
-                                {storeName || `Tienda: ${storeId.substring(0, 8)}...`}
-                            </span>
-                        </div>
-                    )}
-                </div>
+                {/* NOMBRE DEL PREMIO (Estilo Pill Neón) */}
+                {prizeName && (
+                    <div 
+                        className="font-teko text-3xl text-white uppercase py-2 px-10 rounded-full mb-8  bg-black/40 backdrop-blur-sm border-2 border-[#a2e71a]"
+                        style={{
+                            boxShadow: '0 0 20px rgba(162, 231, 26, 0.4), inset 0 0 10px rgba(162, 231, 26, 0.2)',
+                            textShadow: '0 0 10px rgba(162, 231, 26, 0.8)'
+                        }}
+                    >
+                        {prizeName}
+                    </div>
+                )}
+
+                
+                
+                {/* INDICADOR DE TIENDA (Discreto) */}
+                {storeId && (
+                    
+                   
+                    <div className="flex items-center gap-1 text-white/40 mt-8">
+                        <MapPin size={10} />
+                        <span className="text-[9px] font-medium tracking-widest uppercase">
+                            {storeName || `Tienda: ${storeId.substring(0, 8)}...`}
+                        </span>
+                    </div>
+                )}
             </div>
         </div>
     );

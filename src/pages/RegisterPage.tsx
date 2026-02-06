@@ -1,32 +1,39 @@
 import React, { useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom"; 
 import { useRegistration } from "../hooks/useRegistration";
-import { Settings, MapPin,  Check } from 'lucide-react';
+import { Settings, MapPin, Check, X, Upload } from 'lucide-react';
+// IMPORTANTE: Asegúrate de que la ruta sea correcta según tu estructura de carpetas
+import BackgroundCC from "../components/BackgroundCC";
 
 const RegisterPage: React.FC = () => {
     const navigate = useNavigate();
     const { storeId: paramStoreId } = useParams<{ storeId: string }>(); 
     const [searchParams] = useSearchParams();
     
+    // Estados de UI
+    const [showRegisterModal, setShowRegisterModal] = useState(true);
+    const [showTermsModal, setShowTermsModal] = useState(false);
+    const [showGif, setShowGif] = useState(false);
+    const [isRegistered, setIsRegistered] = useState(false);
+    
+    // Estados del formulario (Solo conservamos el checkbox local porque no va al backend)
+    const [termsAccepted, setTermsAccepted] = useState(false);
+
+    // ELIMINADOS LOS ESTADOS LOCALES DE PHONE Y VOUCHER PARA USAR LOS DEL HOOK
+    // const [phone, setPhone] = useState(''); 
+    // const [voucher, setVoucher] = useState<File | null>(null);
+
     const activeStoreId = paramStoreId || searchParams.get("store");
 
-    const [showGif, setShowGif] = useState(false);
-    
-    // Estados para controlar los modales
-    // Eliminado: const [showTermsModal, setShowTermsModal] = useState(true);
-    const [showRegisterModal, setShowRegisterModal] = useState(true); // Ahora inicia en true
-    const [isRegistered, setIsRegistered] = useState(false);
-    const [termsAccepted, setTermsAccepted] = useState(false); // Nuevo estado para el checkbox
-
     const { 
-    loading, 
-    message, 
-    handleSpin, 
-    storeName,
-    name, setName,
-    dni, setDni,
-    email, setEmail // <--- Actualizado
-} = useRegistration();
+        loading, 
+        message, 
+        handleSpin, 
+        storeName,
+        name, setName,
+        phone, setPhone,      // <--- AÑADIDO: Traemos el estado del hook
+        voucher, setVoucher   // <--- AÑADIDO: Traemos el estado del hook
+    } = useRegistration();
 
     const goToStores = () => {
         if (activeStoreId) {
@@ -37,29 +44,25 @@ const RegisterPage: React.FC = () => {
     };
 
     const handleRegisterSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+        e.preventDefault();
 
-    // Expresión regular para validar formato de email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        // 1. Validaciones básicas
+        if (!name || !phone || !voucher || !termsAccepted) {
+            alert("Por favor completa todos los campos y acepta los términos.");
+            return;
+        }
 
-    // 1. Validar campos vacíos
-    if (!name || !dni || !email || !termsAccepted) return;
+        // 2. Validar longitud de Teléfono
+        if (phone.length < 9) {
+            alert("El teléfono debe tener al menos 9 dígitos");
+            return;
+        }
 
-    // 2. Validar formato de email
-    if (!emailRegex.test(email)) {
-        alert("Por favor, ingresa un correo electrónico válido (ejemplo@correo.com)");
-        return;
-    }
+        //console.log("Datos de registro:", { name, phone, voucher });
 
-    // 3. Validar longitud de DNI (opcional pero recomendado)
-    if (dni.length < 8) {
-        alert("El DNI debe tener 8 dígitos");
-        return;
-    }
-
-    setShowRegisterModal(false);
-    setIsRegistered(true);
-};
+        setShowRegisterModal(false);
+        setIsRegistered(true);
+    };
 
     const onSpinClick = async () => {
         if (showGif || loading || !activeStoreId || !isRegistered) {
@@ -84,16 +87,17 @@ const RegisterPage: React.FC = () => {
         } 
     };
 
-    const BRAND_ORANGE = "#000000ff"; 
-    const containerStyle = { backgroundColor: BRAND_ORANGE };
     const TURQUOISE = '#5dc4c0';
     
     return (
-    <div style={containerStyle} className="min-h-screen flex flex-col items-center justify-center p-4 overflow-hidden relative font-sans">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 overflow-hidden relative font-sans">
         
-        <div className="absolute inset-0 bg-[url('/pattern.png')] opacity-10 pointer-events-none"></div>
+        {/* 1. FONDO PRINCIPAL (RULETA) */}
+        <div className="absolute inset-0 z-0">
+            <BackgroundCC />
+        </div>
 
-        <img src="/inkachipslogo.png" alt="logo" className="w-32 h-auto mb-4 z-10 drop-shadow-md" />
+        <img src="/tottusmonster.png" alt="logo" className="w-45 h-auto mb-9 z-10 drop-shadow-md relative" />
 
         {/* === CONTENEDOR DE LA RULETA === */}
         <div className={`relative z-10 w-72 h-72 sm:w-96 sm:h-96 flex items-center justify-center transition-opacity duration-500 ${!isRegistered ? 'opacity-50 blur-sm' : 'opacity-100'}`}>
@@ -103,7 +107,7 @@ const RegisterPage: React.FC = () => {
             </div>
 
             <img 
-                src={showGif ? "/ruletainkachips.gif" : "/ruletainkachips.png"} 
+                src={showGif ? "/ruletainkachips.gif" : "/ruleta.png"} 
                 alt="Ruleta" 
                 className="w-full h-full object-contain drop-shadow-2xl"
             />
@@ -121,7 +125,7 @@ const RegisterPage: React.FC = () => {
                     onClick={onSpinClick}
                     disabled={showGif || loading || !activeStoreId || !isRegistered}
                     className={`
-                        w-28 h-28 rounded-full bg-gray-900 border-2 border-white shadow-lg
+                        w-22 h-22 rounded-full bg-black border-2 border-white shadow-lg
                         flex items-center justify-center transition-transform hover:scale-110 active:scale-95
                         ${(showGif || !isRegistered) ? 'cursor-default' : 'cursor-pointer animate-heartbeat'}
                     `}
@@ -129,19 +133,19 @@ const RegisterPage: React.FC = () => {
                     {loading ? (
                         <span className="text-xs text-white font-bold">...</span>
                     ) : (
-                        <img src="/inkachipslogo.png" alt="GO" className="w-16 h-16 object-contain" />
+                        <img src="/monster.png" alt="GO" className="w-16 h-16 object-contain" />
                     )}
                 </button>
             </div>
         </div>
         
         {/* === NAVBAR INFERIOR === */}
-        <div className="z-20 mt-8 flex flex-col items-center gap-3">
-            <div className="flex items-center gap-4">
+        <div className="z-20 mt-8 flex flex-col items-center gap-3 relative">
+            <div className="flex items-center gap-1">
                 <button 
                     onClick={onSpinClick} 
                     disabled={showGif || loading || !activeStoreId || !isRegistered}
-                    style={{ backgroundColor: TURQUOISE }}
+                    
                     className={`
                         flex items-center px-8 py-2 rounded-full text-white font-black shadow-lg transform transition-all border-2 border-transparent
                         ${showGif || loading || !activeStoreId || !isRegistered
@@ -150,17 +154,17 @@ const RegisterPage: React.FC = () => {
                         }
                     `}
                 >
-                    <span className="text-xl tracking-tight font-creativeLand">
-                        {isRegistered ? "Juega Aqui" : "Regístrate"}
+                    <span className="text-xl tracking-tight font-markpro uppercase border-2 border-[#a2e71a] px-5 rounded-full py-1">
+                        {isRegistered ? "Juega Aquí" : "Regístrate"}
                     </span>
                 </button>
 
                 <button 
                     onClick={goToStores}
                     disabled={showGif} 
-                    style={{ backgroundColor: TURQUOISE }}
+                    
                     className={`
-                        flex items-center justify-center w-10 h-10 rounded-full text-white border-2 border-white/20 shadow-lg transform transition-transform 
+                        flex items-center justify-center w-10 h-10 rounded-full text-white border-2 border-[#a2e71a] shadow-lg transform transition-transform 
                         ${showGif ? 'grayscale opacity-50 cursor-not-allowed' : 'active:scale-95 hover:brightness-110'}
                     `}
                 >
@@ -179,7 +183,7 @@ const RegisterPage: React.FC = () => {
         </div>
 
         {message && (
-            <div className="mt-4 z-20 bg-white/90 text-red-600 px-4 py-2 rounded-lg font-bold shadow-lg text-center mx-4 max-w-xs text-sm">
+            <div className="mt-4 z-20 bg-white/90 text-red-600 px-4 py-2 rounded-lg font-bold shadow-lg text-center mx-4 max-w-xs text-sm relative">
                 {message}
             </div>
         )}
@@ -188,100 +192,161 @@ const RegisterPage: React.FC = () => {
         {/* 2. MODAL DE REGISTRO (FORMULARIO)       */}
         {/* ======================================= */}
         {showRegisterModal && (
-            <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in overflow-y-auto">
-                <div className="bg-black border border-white font-mont-bold rounded-3xl p-5 w-full max-w-sm shadow-2xl relative mt-16 mb-4">
+            <div className="fixed inset-0 z-50 p-4 animate-fade-in overflow-y-auto flex items-center justify-center">
+                
+                {/* 2. FONDO DEL MODAL REGISTRO */}
+                <div className="absolute inset-0 z-0">
+                    <BackgroundCC />
+                </div>
+                
+                {/* Contenedor Flex para alinear caja y botón fuera */}
+                <div className="flex flex-col items-center justify-center w-full mt-20 mb-10 relative z-10">
                     
-                    {/* --- IMAGEN FLOTANTE SUPERIOR CORREGIDA PARA MÓVIL --- */}
-                    <div className="absolute -top-24 left-1/2 transform -translate-x-1/2 z-20">
-                        <img 
-                            src="/inkachipslogo.png" 
-                            alt="Logo InkaChips" 
-                            className="w-36 h-auto drop-shadow-lg" 
-                        />
-                    </div>
-
-                    {/* Cabecera del Formulario */}
-                    <div className="text-center mb-5 mt-2">
-                        <h2 className="text-lg font-bold text-white mb-1">1. REGÍSTRATE PARA PARTICIPAR</h2>
-                        <p className="text-white text-xs text-start">Llena tus datos y participa por fabulosos premios</p>
-                    </div>
-
-                    <form onSubmit={handleRegisterSubmit} className="space-y-3 text-start">
+                   <div 
+    className="bg-transparent border-2 border-white font-mont-bold rounded-3xl p-4 w-auto shadow-2xl relative"
+    style={{
+        borderColor: '#a2e71a',
+        boxShadow: '0 0 15px #a2e71a, inset 0 0 5px #a2e71a' // Glow externo e interno sutil
+    }}
+>
                         
-                        {/* Input Nombre */}
-                        <div>
-                            <label className="block text-white text-xs font-bold mb-1 ml-4">Nombres y Apellidos</label>
-                            <input 
-                                type="text" 
-                                placeholder="Ej. Juan Pérez"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                required
-                                className="w-full px-5 py-1.5 bg-black border border-white rounded-full text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#65c7c3] focus:ring-1 focus:ring-[#65c7c3] transition-colors"
+                        {/* --- LOGO --- */}
+                        <div className="absolute -top-42 left-1/2 transform -translate-x-1/2 z-20 w-full flex justify-center">
+                            <img 
+                                src="/tottusmonster.png" 
+                                alt="Logo Tottus Monster" 
+                                className="w-60 md:w-48 h-auto drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)]" 
                             />
                         </div>
 
-                        {/* Input DNI */}
-                        <div>
-                            <label className="block text-white text-xs font-bold mb-1 ml-4">Número de DNI</label>
-                            <input 
-                                type="tel" 
-                                placeholder="8 dígitos"
-                                value={dni}
-                                onChange={(e) => setDni(e.target.value)}
-                                maxLength={11}
-                                required
-                                className="w-full px-5 py-1.5 bg-black border border-white rounded-full text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#65c7c3] focus:ring-1 focus:ring-[#65c7c3] transition-colors"
-                            />
+                        {/* Cabecera */}
+                        <div className="text-left mb-2 mt-0">
+                            <h2 className="text-[23px] font-teko text-white mb-0 tracking-normal">1 . REGÍSTRATE PARA PARTICIPAR</h2>
+                            <p className="text-white text-[15px] text-left opacity-90 mb-4 leading-4">Llena tus datos y participa por<br/> fabulosos premios</p>
                         </div>
 
-                        {/* Input Email */}
-                        <div>
-                            <label className="block text-white text-xs font-bold mb-1 ml-4">Correo Electrónico</label>
-                            <input 
-                                type="email" 
-                                placeholder="ejemplo@correo.com"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                required
-                                className="w-full px-5 py-1.5 bg-black border border-white rounded-full text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#65c7c3] focus:ring-1 focus:ring-[#65c7c3] transition-colors"
-                            />
-                        </div>
-
-                        {/* CHECKBOX TÉRMINOS Y CONDICIONES */}
-                        <div className="flex items-start gap-2 mt-3 px-2">
-                            <div className="relative flex items-center pt-1">
-                                <input
-                                    type="checkbox"
-                                    id="terms"
-                                    checked={termsAccepted}
-                                    onChange={(e) => setTermsAccepted(e.target.checked)}
-                                    className="peer h-4 w-4 cursor-pointer appearance-none rounded border border-white bg-transparent transition-all checked:bg-[#65c7c3] checked:border-[#65c7c3]"
+                        {/* FORMULARIO CON ID */}
+                        <form id="register-form" onSubmit={handleRegisterSubmit} className="space-y-2 text-start">
+                            
+                            {/* Input Nombre */}
+                            <div>
+                                <label className="block text-white text-[13px] font-bold mb-0 ml-1">Nombres y apellidos</label>
+                                <input 
+                                    type="text" 
+                                    placeholder="Ej. Juan Pérez"
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    required
+                                    className="w-76 px-5 py-1 bg-transparent border border-2 border-[#a2e71a] rounded-full text-white text-sm placeholder-gray-500 transition-all"
                                 />
-                                <div className="pointer-events-none absolute top-1 left-0 text-white opacity-0 peer-checked:opacity-100 flex items-center justify-center w-4 h-4">
-                                    <Check size={12} strokeWidth={4} />
-                                </div>
                             </div>
-                            <label htmlFor="terms" className="text-[10px] text-gray-300 cursor-pointer select-none leading-tight">
-                                Acepto los términos y condiciones de uso de imagen para fines publicitarios.
-                            </label>
-                        </div>
 
-                        {/* BOTÓN ENVIAR */}
-                        <button
-                            type="submit"
-                            disabled={!termsAccepted}
-                            className={`w-full mt-4 py-2.5 rounded-full text-white font-black text-lg shadow-lg transition-transform active:scale-95 flex items-center justify-center gap-2 tracking-widest
-                                ${termsAccepted 
-                                    ? 'hover:brightness-110 shadow-[0_0_15px_rgba(101,199,195,0.4)]' 
-                                    : 'opacity-50 cursor-not-allowed grayscale'
-                                }
-                            `}
-                            style={{ backgroundColor: '#65c7c3' }}
-                        >
-                            ENVIAR
-                        </button>
-                    </form>
+                            {/* Input Teléfono */}
+                            <div>
+                                <label className="block text-white text-[13px] font-bold mb-0 ml-1">Teléfono</label>
+                                <input 
+                                    type="tel" 
+                                    placeholder="987654321"
+                                    value={phone}
+                                    onChange={(e) => setPhone(e.target.value)}
+                                    maxLength={9}
+                                    required
+                                    className="w-76 px-5 py-1 bg-transparent border border-2 border-[#a2e71a] rounded-full text-white text-sm placeholder-gray-500 focus:outline-none transition-all"
+                                />
+                            </div>
+
+                            {/* Input Foto Voucher */}
+                            <div>
+                                <label className="block text-white text-[13px] font-bold mb-0 ml-1 tracking-wider">Foto de Voucher</label>
+                                <label className="cursor-pointer flex items-center justify-left gap-2 w-76 px-6 py-1 border-2 border-[#a2e71a] rounded-full text-white text-xs font-black hover:bg-[#a2e71a] hover:text-black transition-all shadow-[0_0_10px_rgba(162,231,26,0.3)] active:scale-95">
+                                    
+                                    {voucher ? "ARCHIVO SELECCIONADO" : "SELECCIONAR ARCHIVO"}
+                                    <input 
+                                        type="file" 
+                                        className="hidden" 
+                                        accept="image/*"
+                                        onChange={(e) => {
+                                            if (e.target.files && e.target.files[0]) {
+                                                setVoucher(e.target.files[0]);
+                                            }
+                                        }}
+                                        required
+                                    />
+                                </label>
+                            </div>
+
+                            {/* CHECKBOX TÉRMINOS */}
+                            <div className="flex items-start gap-2 mt-4 px-2 max-w-[288px]">
+                                <div className="relative flex items-center pt-1">
+                                    <input
+                                        type="checkbox"
+                                        id="terms"
+                                        checked={termsAccepted}
+                                        onChange={(e) => setTermsAccepted(e.target.checked)}
+                                        className="peer h-4 w-4 cursor-pointer appearance-none rounded border border-white bg-transparent transition-all checked:bg-[#a2e71a] checked:border-[#a2e71a]"
+                                    />
+                                    <div className="pointer-events-none absolute top-1 left-0 text-white opacity-0 peer-checked:opacity-100 flex items-center justify-center w-4 h-4">
+                                        <Check size={12}  />
+                                    </div>
+                                </div>
+                                <label htmlFor="terms" className="text-[10px] text-gray-300 cursor-pointer select-none leading-tight">
+                                    Acepto los <span 
+                                        onClick={(e) => { e.preventDefault(); setShowTermsModal(true); }}
+                                        className="text-[#a2e71a] underline font-bold cursor-pointer"
+                                    >términos y condiciones</span> de uso de imagen para fines publicitarios.
+                                </label>
+                            </div>
+                        </form>
+                    </div>
+
+                    {/* BOTÓN FUERA DE LA CAJA (Vinculado al form por ID) */}
+                    <button
+                        type="submit"
+                        form="register-form"
+                        disabled={!termsAccepted}
+                        className={`w-48 mt-10 py-1 rounded-full text-white bg-transparent font-black text-2xl shadow-lg border border-[#a2e71a] font-teko transition-all active:scale-95 
+                            ${termsAccepted 
+                                ? 'hover:brightness-110 shadow-[0_0_20px_rgba(101,199,195,0.4)]' 
+                                : 'opacity-40 cursor-not-allowed grayscale'
+                            }
+                        `}
+                        
+                    >
+                        ENVIAR
+                    </button>
+
+                </div>
+            </div>
+        )}
+
+        {/* --- MODAL DE TÉRMINOS CON BORDE NEÓN --- */}
+        {showTermsModal && (
+            <div className="fixed inset-0 z-[60] p-6 animate-fade-in flex items-center justify-center">
+                
+                {/* 3. FONDO DEL MODAL TÉRMINOS */}
+                <div className="absolute inset-0 z-0">
+                    <BackgroundCC />
+                </div>
+
+                <div className="bg-black border-2 border-[#a2e71a] rounded-3xl p-8 max-w-md w-full relative shadow-[0_0_30px_rgba(162,231,26,0.2)] z-10">
+                    <button 
+                        onClick={() => setShowTermsModal(false)}
+                        className="absolute top-4 right-4 text-[#a2e71a] hover:scale-110 transition-transform"
+                    >
+                        <X size={24} strokeWidth={3} />
+                    </button>
+                    
+                    <h3 className="text-[#a2e71a] font-black text-xl mb-4 tracking-tighter">TÉRMINOS Y CONDICIONES</h3>
+                    
+                    <div className="max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+                        <p className="text-white text-xs leading-relaxed text-justify font-light">
+                            Promoción válida del 30 de enero del 2026 al 28 de febrero del 2026. Mecánica: Participan personas naturales mayores de 18 años, con residencia legal y domicilio en el territorio nacional del Perú, que realice la compra de Monster, en las tiendas Tottus ; para participar de la promoción RULETA VIRTUAL CAMPAÑA TOTTUS, deberás comprar 2 latas de monster (aplican todos los sabores) y podrás escanear el código QR ubicado en las tiendas autorizadas, llenar los datos de tu boucher de compra y subir su foto para entrar al sorteo por diferentes premios. El horario para ingresar a la landing page será en los horarios de atención de las tiendas TOTTUS .
+                            <br /><br />
+                            <strong>Los premios son:</strong> Alfombra de yoga (20), Ultra Paraguas (20), Ultra lentes de sol (20), Ultra Bocina (20), Ultra Cargador (20), Ultra Tomatodo Yeti (20).
+                            <br /><br />
+                            <strong>Modalidad de entrega de premios:</strong> Se hará entrega a los activadores en tienda de la pestaña de premio ganado; el cual validará la participación y el boucher de compra para otorgar el premio ganado. Entrega de premios sujetos a stock de tienda.
+                        </p>
+                    </div>
                 </div>
             </div>
         )}
