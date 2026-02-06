@@ -107,7 +107,7 @@ const RegisterPage: React.FC = () => {
             </div>
 
             <img 
-                src={showGif ? "/ruletamonster.gif" : "/ruleta.png"} 
+                src={showGif ? "/ruletamonster.gif" : "/ruletamonster.png"} 
                 alt="Ruleta" 
                 className="w-full h-full object-contain drop-shadow-2xl"
             />
