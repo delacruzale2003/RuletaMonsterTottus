@@ -60,7 +60,7 @@ const Home: React.FC = () => {
             <div className={`flex items-center justify-center w-full transition-all duration-500 ${isAuthenticated ? 'flex-1' : 'mb-8'}`}>
                 <img 
                     src="/tottusmonster.png" 
-                    alt="Logo Inka Chips" 
+                    alt="Logo monster tottus" 
                     className={`h-auto transition-all duration-500 ${isAuthenticated ? 'w-48 sm:w-64' : 'w-32 sm:w-40'}`} 
                 />
             </div>
