@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom"; 
 import { useRegistration } from "../hooks/useRegistration";
-import { Settings, MapPin, Check, X, Upload } from 'lucide-react';
+import { Settings, MapPin, Check, X } from 'lucide-react';
 // IMPORTANTE: Asegúrate de que la ruta sea correcta según tu estructura de carpetas
 import BackgroundCC from "../components/BackgroundCC";
 
@@ -87,7 +87,7 @@ const RegisterPage: React.FC = () => {
         } 
     };
 
-    const TURQUOISE = '#5dc4c0';
+   
     
     return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 overflow-hidden relative font-sans">
